@@ -1,15 +1,12 @@
-import { parse } from "@babel/parser";
+import { parse, ParserOptions } from "@babel/parser";
 
 const testTokens = ["describe", "it", "test"];
 
 function codeParser(sourceCode) {
-  const parserOptions = {
-    plugins: [
-      "jsx",
-      "typescript"
-    ],
+  const parserOptions: ParserOptions = {
+    plugins: ["jsx", "typescript"],
     sourceType: "module",
-    tokens: true,
+    tokens: true
   };
   const ast = parse(sourceCode, parserOptions);
 
@@ -26,9 +23,19 @@ function codeParser(sourceCode) {
         return;
       }
 
+      let testNameToken;
+
+      const currentToken = ast.tokens[index + 2];
+
+      if (currentToken.value === undefined && currentToken.type.label === "`") {
+        testNameToken = ast.tokens[index + 3];
+      } else {
+        testNameToken = ast.tokens[index + 2];
+      }
+
       return {
         loc,
-        testName: ast.tokens[index + 2].value
+        testName: testNameToken.value
       };
     })
     .filter(Boolean);
